@@ -2,6 +2,8 @@ package main
 
 import (
 	"net/http"
+
+	"github.com/hconn7/BlogAggregator/helpers"
 )
 
 func ReadinessCheck(w http.ResponseWriter, r *http.Request) {
@@ -9,7 +11,7 @@ func ReadinessCheck(w http.ResponseWriter, r *http.Request) {
 		Status string `json:"status"`
 	}
 
-	RespondWithJson(w, http.StatusOK, response{
+	helpers.RespondWithJson(w, http.StatusOK, response{
 		Status: "ok",
 	})
 }
@@ -20,6 +22,6 @@ func ErrorCheck(w http.ResponseWriter, r *http.Request) {
 	type response struct {
 		Error string `json:"error"`
 	}
-	RespondWithError(w, http.StatusInternalServerError, "Error working")
+	helpers.RespondWithError(w, http.StatusInternalServerError, "Error working")
 	return
 }
