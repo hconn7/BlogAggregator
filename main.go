@@ -2,12 +2,14 @@ package main
 
 import (
 	"database/sql"
-	"github.com/hconn7/BlogAggregator/internal/database"
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	"log"
 	"net/http"
 	"os"
+	"time"
+
+	"github.com/hconn7/BlogAggregator/internal/database"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 type apiConfig struct {
@@ -42,6 +44,9 @@ func main() {
 		Addr:    port,
 		Handler: mux,
 	}
+	const collectionConcurrency = 10
+	const collectionInterval = time.Minute
+	go startScraping(dbQueries, collectionConcurrency, collectionInterval)
 	log.Printf("Serving running on %s from path %s\n", port, filePathRoot)
 	log.Fatal(srv.ListenAndServe())
 }
