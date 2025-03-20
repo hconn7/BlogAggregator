@@ -6,13 +6,14 @@ import (
 	"os"
 
 	"github.com.hconn7/BlogAggregator/internal/config"
+	"github.com.hconn7/BlogAggregator/internal/database"
 	_ "github.com/lib/pq"
 )
 
-const queryString = "postgres://henry:@localhost:5432/gator"
+const queryString = "postgres://henry:@localhost:5432/gator?sslmode=disable"
 
 func main() {
-	db, err := sql.Open("postgres", quequeryString)
+	db, err := sql.Open("postgres", queryString)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -22,16 +23,16 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	state := &config.State{CfgPointer: &cfg}
+	state := &config.State{CfgPointer: &cfg, Db: dbQueries}
 
 	commands := config.Commands{CommandMap: make(map[string]func(*config.State, config.Command) error)}
 
 	commands.Register("login", config.HandlerLogin)
-
+	commands.Register("register", config.HandlerRegister)
 	args := os.Args
 	if len(args) < 2 {
-		os.Exit(1)
 		fmt.Println("Error! need more arguments")
+		os.Exit(1)
 	}
 	var command config.Command
 	cmdName := args[1]
@@ -42,11 +43,12 @@ func main() {
 	if ok {
 		err = commands.Run(state, command)
 		if err != nil {
+
+			fmt.Println(err)
 			os.Exit(1)
-			fmt.Println("Username required")
 		}
 	} else {
-		os.Exit(1)
 		fmt.Println("Command doesn't exist!")
+		os.Exit(1)
 	}
 }
