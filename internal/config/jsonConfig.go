@@ -13,17 +13,23 @@ type Config struct {
 	User  string `json:"current_user_name"`
 }
 
-func (cfg *Config) ReadDB() (Config, error) {
+func ReadDB() (Config, error) {
 	filePath, _ := getConfigFilePath()
 
-	var config Config
-	data, err := os.ReadFile(filePath)
+	file, err := os.Open(filePath)
 	if err != nil {
 		return Config{}, err
 	}
 
-	json.Unmarshal(data, &config)
-	return config, nil
+	defer file.Close()
+
+	decoder := json.NewDecoder(file)
+	cfg := Config{}
+	err = decoder.Decode(&cfg)
+	if err != nil {
+		return Config{}, err
+	}
+	return cfg, nil
 }
 
 func WriteFile(cfg *Config) error {
